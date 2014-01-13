@@ -11,14 +11,26 @@ tableroInicial(X) :- X =
  [empty,empty,empty,empty,empty,empty,empty,empty],
 
  [white,empty,white,empty,white,empty,white,empty],
- [empty,black,empty,white,empty,white,empty,white],
+
  %[empty,white,empty,white,empty,white,empty,white],
  %[white,empty,white,empty,white,empty,white,empty]].
+ [empty,black,empty,white,empty,white,empty,white],
  [empty,empty,empty,empty,empty,empty,empty,empty]].
  
+/* 
+  [[empty,empty,empty,empty,empty,empty,empty,empty],
+   [empty,empty,empty,empty,empty,empty,empty,black],
+   [black,empty,black,empty,black,empty,empty,empty],
+   [empty,black,empty,black,empty,black,empty,black],
+   [white,empty,white,empty,white,empty,white,empty],
+   [empty,white,empty,white,empty,white,empty,white],
+   [empty,empty,empty,empty,empty,empty,empty,empty],
+   [empty,empty,empty,empty,empty,empty,empty,empty]].
+ */
  
 % Inicializar tablero dinamicamente 
  inicializar :- tableroInicial(X), assert(tablero(X)),
+                assert(turnoNormal),
                 assert(jugadorActual(jugador1)).
  
  convertir(empty, '  ').
@@ -96,9 +108,10 @@ jugadaValida(Piece,X1,Y1,X2,Y2) :-
                      posicionValida(X2,Y2),
                      direccionVertical(Y1,Y2,Piece,YNuevo1,YNuevo2),
                      direccionHorizontal(X1,XDiag1,XDiag2),
-                     ((XDiag1 =:= X2, YNuevo1 =:= Y2, 
+                     ((XDiag1 =:= X2, YNuevo1 =:= Y2, turnoNormal,
                            buscarPieza(XDiag1,YNuevo1,PieceDiag1), PieceDiag1 = empty);
-                     (XDiag2 =:= X2, YNuevo2 =:= Y2, 
+                     (XDiag2 =:= X2, YNuevo2 =:= Y2, ((turnoNormal,!); 
+                       (turnoEspecial(Xspecial, Yspecial), Xspecial = X1, Yspecial = Y1)),
                            buscarPieza(XDiag2,YNuevo2,PieceDiag2), PieceDiag2 = empty,   
                            buscarPieza(XDiag1,YNuevo1,PieceDiag1), piezaContraria(Piece,Contraria1), PieceDiag1 = Contraria1)),
                      !.
@@ -124,20 +137,25 @@ cambiarJugador :- jugadorActual(X),
                   ((X = jugador1, assert(jugadorActual(jugador2)));
                   (X = jugador2, assert(jugadorActual(jugador1)))).
                   
-jugada(X1,Y1,X2,Y2) :-  
-                      buscarPieza(X1,Y1,Piece),
-                      jugadorActual(Jugador),
-                      asociarJugador(Jugador,Piece),
-                      jugadaValida(Piece,X1,Y1,X2,Y2),
-                      cambiarPieza(X1,Y1,empty),
-                      cambiarPieza(X2,Y2,Piece),
-                      direccionVertical(Y1,Y2,Piece,YNuevo1,YNuevo2),
-                      ((YNuevo1 =:= Y2,
-                      ((Y2 =:= 1, Piece = white, convertirRey(X2,Y2,white));
-                      (Y2 =:= 8, Piece = black, cambiarPieza(X2,Y2,blackKing)); Y2 =\= 1; Y2 =\= 8),
-                      cambiarJugador, turno,!); 
-                      (YNuevo2 =:= Y2, (X1 < X2, XIntermed is X1 + 1; X1 > X2, XIntermed is X1 - 1),
-                      cambiarPieza(XIntermed,YNuevo1,empty),jugarDeNuevo(X2,Y2,Piece),!)).
+                  
+
+
+jugada(X1,Y1,X2,Y2) :- buscarPieza(X1,Y1,Piece),
+                       jugadorActual(Jugador),
+                       asociarJugador(Jugador,Piece),
+                       jugadaValida(Piece,X1,Y1,X2,Y2),
+                       cambiarPieza(X1,Y1,empty),
+                       cambiarPieza(X2,Y2,Piece),
+                       (turnoNormal; (retract(turnoEspecial(_,_)), assert(turnoNormal))),
+                       direccionVertical(Y1,Y2,Piece,YNuevo1,YNuevo2),
+                       ((YNuevo1 =:= Y2,
+                       ((Y2 =:= 1, Piece = white, convertirRey(X2,Y2,white));
+                       (Y2 =:= 8, Piece = black, cambiarPieza(X2,Y2,blackKing)); Y2 =\= 1; Y2 =\= 8),
+                       cambiarJugador, turno,!); 
+                       (YNuevo2 =:= Y2,  
+                       (X1 < X2, XIntermed is X1 + 1; X1 > X2, XIntermed is X1 - 1),
+                       cambiarPieza(XIntermed,YNuevo1,empty), 
+                       jugarDeNuevo(X2,Y2,Piece),!)).
                       
 jugada(_,_,_,_) :- write('Jugada invalida, juega de nuevo.'),
                    nl,
@@ -162,25 +180,36 @@ jugarDeNuevo(X,Y,Piece) :- XLeft is X - 2,
                             jugadaValida(Piece,X,Y,XRight,YDown)),
                             write('Te comiste una ficha! Puedes jugar de nuevo!'),
                             nl,
+                            assert(turnoEspecial(X,Y)),
+                            retract(turnoNormal),
                             turno,
                             !.
                             
 jugarDeNuevo(_,_,_) :- cambiarJugador, turno.
                             
 turno :- imprimirTablero,
-         %verificarTablero,
+         verificarTablero,
          jugadorActual(X),
          write('Juega '), write(X),!.
 
 turno :- cambiarJugador,
          jugadorActual(X),
          write('Ha ganado el '), write(X),
-         retract(tablero(_)).
+         retract(tablero(_)),!.
+         
          
 jugar :- inicializar,
+         preguntar,
          write('Comenzo el juego'),
          nl,
          turno.
+
+preguntar :- write('Desea jugar contra la maquina (S/N)? '),
+             read(Input),        
+             ((Input = 'S', assert(tipoJuego(computadora))); 
+             (Input = 'N', assert(tipoJuego(humano)))),!.
+             
+preguntar :- preguntar.
          
 convertirRey(X,Y,black) :- cambiarPieza(X,Y,blackKing).
 convertirRey(X,Y,white) :- cambiarPieza(X,Y,whiteKing).
@@ -190,18 +219,26 @@ convertirRey(X,Y,white) :- cambiarPieza(X,Y,whiteKing).
 
 verificarTablero :- existeFicha(jugador1),
                     existeFicha(jugador2),
-                    tablero(T),
-                    buscarMovFila(1,1,T).
-                       
-buscarMovFila(X,Y,[H|_]) :- buscarMovColumna(X,Y,H),!. 
-buscarMovFila(X,Y,[_|T]) :- YNuevo is Y + 1,                                
-                            buscarMovFila(X,YNuevo,T).
+                    buscarMovimientos(_).
 
-buscarMovColumna(X,Y,[H|_]) :- notEmpty(H),
-                              
-                               jugadaValida(_,X,Y,_,_),!.
-buscarMovColumna(X,Y,[_|T]) :- XNuevo is X + 1,
-                               buscarMovColumna(XNuevo,Y,T).
+buscarMovimientos(Jugada) :- tablero(T),
+                             buscarMovFila(1,1,Jugada,T).                    
+                    
+buscarMovFila(X,Y,Jugada,[H|_]) :- buscarMovColumna(X,Y,Jugada,H). 
+buscarMovFila(X,Y,Jugada,[_|T]) :- YNuevo is Y + 1,                                
+                                   buscarMovFila(X,YNuevo,Jugada,T).
+
+buscarMovColumna(X,Y,Jugada,[H|_]) :- notEmpty(H),
+                                             direccionHorizontal(X,XNuevo1,XNuevo2),
+                                             direccionHorizontal(Y,YNuevo1,YNuevo2),
+                                             buscarPieza(X,Y,Piece),
+                                             ((jugadaValida(Piece,X,Y,XNuevo1,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo1));
+                                             (jugadaValida(Piece,X,Y,XNuevo1,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo2));
+                                             (jugadaValida(Piece,X,Y,XNuevo2,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo1));
+                                             (jugadaValida(Piece,X,Y,XNuevo2,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo2))).
+                                             
+buscarMovColumna(X,Y,Jugada,[_|T]) :- XNuevo is X + 1,
+                                             buscarMovColumna(XNuevo,Y,Jugada,T).
                         
 existeFicha(Jugador) :- tablero(T),
                         existeFichaFila(T,Jugador).
@@ -211,7 +248,13 @@ existeFichaFila([H|_],Jugador) :- asociarJugador(Jugador,Piece),
 existeFichaFila([_|T],Jugador) :- existeFichaFila(T,Jugador).
 
 
-
+jugarMaquina :- findall(M,buscarMovimientos(M),Lista),
+                random_member(Move,Lista),
+                Move = movimiento(Piece,X1,Y1,X2,Y2),
+                asociarJugador(jugador2,Piece),
+                jugada(X1,Y1,X2,Y2),!.
+                
+jugarMaquina :- jugarMaquina.
 
 
 

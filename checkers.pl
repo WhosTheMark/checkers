@@ -102,6 +102,55 @@ direccionHorizontal(X,XDiag1,XDiag2) :- XDiag1 is X + 1, XDiag2 is X + 2.
 direccionHorizontal(X,XDiag1,XDiag2) :- XDiag1 is X - 1, XDiag2 is X - 2. 
 
 
+diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- posicionValida(X2,Y2),
+                                         buscarPieza(X1,Y1,PieceAnt),
+                                         piezaContraria(Piece,PieceAnt),
+                                         buscarPieza(X2,Y2,PieceAct),
+                                         PieceAct = empty,
+                                         PosFin = posRey(X1,Y1,X2,Y2),!.
+
+                                  
+diagonalRey(_,X1,Y1,X2,Y2,PosFin) :- posicionValida(X2,Y2),
+                                     buscarPieza(X1,Y1,PieceAnt),
+                                     PieceAnt = empty,
+                                     buscarPieza(X2,Y2,PieceAct),
+                                     PieceAct = empty,
+                                     PosFin = posRey(X1,Y1,X2,Y2),!.
+                                    
+diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 > X2, Y1 > Y2,
+                                         XDiag is X1 - 1, YDiag is Y1 - 1,
+                                         posicionValida(XDiag,YDiag),
+                                         diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+                                  
+diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 > Y2,
+                                         XDiag is X1 + 1, YDiag is Y1 - 1,
+                                         posicionValida(XDiag,YDiag),
+                                         diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+                                  
+diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 > X2, Y1 < Y2,
+                                         XDiag is X1 - 1, YDiag is Y1 + 1,
+                                         posicionValida(XDiag,YDiag),
+                                         diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+
+diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 < Y2,
+                                         XDiag is X1 + 1, YDiag is Y1 + 1,
+                                         posicionValida(XDiag,YDiag),
+                                         diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+
+                                  
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 + 2, Y2 is Y1 + 2,
+                                          X3 is X1 + 3, Y3 is Y1 + 3.
+                                           
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 + 2, Y2 is Y1 - 2,
+                                          X3 is X1 + 3, Y3 is Y1 - 3.
+                                                                                     
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 - 2, Y2 is Y1 + 2,
+                                          X3 is X1 - 3, Y3 is Y1 + 3.
+                                                                                     
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 - 2, Y2 is Y1 - 2,
+                                          X3 is X1 - 3, Y3 is Y1 - 3.
+                                          
+                                          
 % Ver si la pieza se puede mover al lugar indicado. Ya fue verificado que es el jugador correcto.                                
 jugadaValida(Piece,X1,Y1,X2,Y2) :-
                      
@@ -110,11 +159,19 @@ jugadaValida(Piece,X1,Y1,X2,Y2) :-
                      direccionHorizontal(X1,XDiag1,XDiag2),
                      ((XDiag1 =:= X2, YNuevo1 =:= Y2, turnoNormal,
                            buscarPieza(XDiag1,YNuevo1,PieceDiag1), PieceDiag1 = empty);
-                     (XDiag2 =:= X2, YNuevo2 =:= Y2, ((turnoNormal,!); 
+                     (XDiag2 =:= X2, YNuevo2 =:= Y2, ((turnoNormal,!); %TURNO NORMAL, NO ESTA FIJA SU POSICION TODAVIA. PRIMERA VEZ QUE COME........
                        (turnoEspecial(Xspecial, Yspecial), Xspecial = X1, Yspecial = Y1)),
                            buscarPieza(XDiag2,YNuevo2,PieceDiag2), PieceDiag2 = empty,   
                            buscarPieza(XDiag1,YNuevo1,PieceDiag1), piezaContraria(Piece,Contraria1), PieceDiag1 = Contraria1)),
                      !.
+                     
+jugadaValida(Piece,X1,Y1,X2,Y2) :- (Piece = blackKing; Piece = whiteKing),
+                                   diagonalesRey(X1,Y1,XRey2,YRey2,XRey3,YRey3),
+                                   diagonalRey(Piece,XRey2,YRey2,XRey3,YRey3,PosFin),
+                                   PosFin = posRey(XAnt,YAnt,X2,Y2),
+                                   buscarPieza(XAnt,YAnt,PieceAnt),                                    
+                                   (PieceAnt = empty; ((turnoNormal,!); 
+                                   (turnoEspecial(Xspecial, Yspecial), Xspecial = X1, Yspecial = Y1))).
                      
                      
 cambiarPieza(X,Y,TypePiece) :- tablero(T),
@@ -152,15 +209,28 @@ jugada(X1,Y1,X2,Y2) :- buscarPieza(X1,Y1,Piece),
                        ((Y2 =:= 1, Piece = white, convertirRey(X2,Y2,white));
                        (Y2 =:= 8, Piece = black, cambiarPieza(X2,Y2,blackKing)); Y2 =\= 1; Y2 =\= 8),
                        cambiarJugador, turno,!); 
-                       (YNuevo2 =:= Y2,  
+                       
+                       ((YNuevo2 =:= Y2,  
                        (X1 < X2, XIntermed is X1 + 1; X1 > X2, XIntermed is X1 - 1),
-                       cambiarPieza(XIntermed,YNuevo1,empty), 
-                       jugarDeNuevo(X2,Y2,Piece),!)).
+                       cambiarPieza(XIntermed,YNuevo1,empty),jugarDeNuevo(X2,Y2,Piece),!)); 
+                       
+                       (isKing(Piece), 
+                       direccionHorizontal(X2,XDiag,_),
+                       direccionVertical(Y2,Y1,Piece,YNuevo,_),
+                       ((X1 < XDiag, XDiag < X2, Y1 < YNuevo, YNuevo < Y2);
+                       (X1 < XDiag, XDiag < X2, Y1 > YNuevo, YNuevo > Y2);
+                       (X1 > XDiag, XDiag > X2, Y1 < YNuevo, YNuevo < Y2);
+                       (X1 > XDiag, XDiag > X2, Y1 > YNuevo, YNuevo > Y2)),
+                       buscarPieza(XDiag,YNuevo,PieceAnt),
+                       ((PieceAnt = empty, cambiarJugador, turno, !);
+                       (cambiarPieza(XDiag,YNuevo,empty), jugarDeNuevo(X2,Y2,Piece),!)))).
                       
 jugada(_,_,_,_) :- write('Jugada invalida, juega de nuevo.'),
                    nl,
                    turno. 
 
+
+                   
 jugarDeNuevo(X,1,white) :- convertirRey(X,1,white),
                            cambiarJugador,
                            turno, !.      
@@ -184,6 +254,20 @@ jugarDeNuevo(X,Y,Piece) :- XLeft is X - 2,
                             retract(turnoNormal),
                             turno,
                             !.
+                            
+jugarDeNuevo(X,Y,Piece) :- isKing(Piece),
+                           diagonalesRey(X,Y,X2,Y2,X3,Y3),
+                           write('holaaaaa'),nl,
+                           diagonalRey(Piece,X2,Y2,X3,Y3,PosFin),                           
+                           PosFin = posRey(XAnt,YAnt,_,_),
+                           buscarPieza(XAnt,YAnt,PieceAnt),
+                           notEmpty(PieceAnt),
+                           write('Te comiste una ficha! Puedes jugar de nuevo!'),
+                           nl,
+                           assert(turnoEspecial(X,Y)),
+                           retract(turnoNormal),
+                           turno,
+                           !.
                             
 jugarDeNuevo(_,_,_) :- cambiarJugador, turno.
                             
@@ -218,8 +302,8 @@ convertirRey(X,Y,white) :- cambiarPieza(X,Y,whiteKing).
 
 
 verificarTablero :- existeFicha(jugador1),
-                    existeFicha(jugador2),
-                    buscarMovimientos(_).
+                    existeFicha(jugador2).
+                   % buscarMovimientos(_).
 
 buscarMovimientos(Jugada) :- tablero(T),
                              buscarMovFila(1,1,Jugada,T).                    
@@ -229,13 +313,13 @@ buscarMovFila(X,Y,Jugada,[_|T]) :- YNuevo is Y + 1,
                                    buscarMovFila(X,YNuevo,Jugada,T).
 
 buscarMovColumna(X,Y,Jugada,[H|_]) :- notEmpty(H),
-                                             direccionHorizontal(X,XNuevo1,XNuevo2),
-                                             direccionHorizontal(Y,YNuevo1,YNuevo2),
-                                             buscarPieza(X,Y,Piece),
-                                             ((jugadaValida(Piece,X,Y,XNuevo1,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo1));
-                                             (jugadaValida(Piece,X,Y,XNuevo1,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo2));
-                                             (jugadaValida(Piece,X,Y,XNuevo2,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo1));
-                                             (jugadaValida(Piece,X,Y,XNuevo2,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo2))).
+                                      direccionHorizontal(X,XNuevo1,XNuevo2),
+                                      direccionHorizontal(Y,YNuevo1,YNuevo2),
+                                      buscarPieza(X,Y,Piece),
+                                      ((jugadaValida(Piece,X,Y,XNuevo1,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo1));
+                                      (jugadaValida(Piece,X,Y,XNuevo1,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo2));
+                                      (jugadaValida(Piece,X,Y,XNuevo2,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo1));
+                                      (jugadaValida(Piece,X,Y,XNuevo2,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo2))).
                                              
 buscarMovColumna(X,Y,Jugada,[_|T]) :- XNuevo is X + 1,
                                              buscarMovColumna(XNuevo,Y,Jugada,T).

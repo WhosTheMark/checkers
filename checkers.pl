@@ -86,14 +86,14 @@ piezaContraria(black,white).
 piezaContraria(black,whiteKing).
 piezaContraria(blackKing,white).
 piezaContraria(blackKing,whiteKing).
+piezaContraria(empty,_) :- !,fail.
+piezaContraria(X,Y) :- piezaContraria(Y,X),!.
 
-piezaContraria(white,black).
-piezaContraria(whiteKing,black).
-piezaContraria(white,blackKing).
-piezaContraria(whiteKing,blackKing).
+%piezaContraria(white,black).
+%piezaContraria(whiteKing,black).
+%piezaContraria(white,blackKing).
+%piezaContraria(whiteKing,blackKing).
 
-
-%piezaContraria(X,Y) :- piezaContraria(Y,X),!.
 
 isKing(whiteKing).
 isKing(blackKing).
@@ -122,25 +122,25 @@ diagonalRey(_,X1,Y1,X2,Y2,PosFin) :- posicionValida(X2,Y2),
                                      PieceAnt = empty,
                                      buscarPieza(X2,Y2,PieceAct),
                                      PieceAct = empty,
-                                     PosFin = posRey(X1,Y1,X2,Y2),!.
+                                     PosFin = posRey(X1,Y1,X2,Y2).
                                     
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 > X2, Y1 > Y2,
-                                         XDiag is X1 - 1, YDiag is Y1 - 1,
+                                         XDiag is X2 - 1, YDiag is Y2 - 1,
                                          posicionValida(XDiag,YDiag),
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
                                   
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 > Y2,
-                                         XDiag is X1 + 1, YDiag is Y1 - 1,
+                                         XDiag is X2 + 1, YDiag is Y2 - 1,
                                          posicionValida(XDiag,YDiag),
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
                                   
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 > X2, Y1 < Y2,
-                                         XDiag is X1 - 1, YDiag is Y1 + 1,
+                                         XDiag is X2 - 1, YDiag is Y2 + 1,
                                          posicionValida(XDiag,YDiag),
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
 
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 < Y2,
-                                         XDiag is X1 + 1, YDiag is Y1 + 1,
+                                         XDiag is X2 + 1, YDiag is Y2 + 1,
                                          posicionValida(XDiag,YDiag),
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
 
@@ -276,7 +276,6 @@ jugarDeNuevo(X,Y,Piece) :- XLeft is X - 2,
                             
 jugarDeNuevo(X,Y,Piece) :- isKing(Piece),
                            diagonalesRey(X,Y,X2,Y2,X3,Y3),
-                           write('holaaaaa'),nl,
                            diagonalRey(Piece,X2,Y2,X3,Y3,PosFin),                           
                            PosFin = posRey(XAnt,YAnt,_,_),
                            buscarPieza(XAnt,YAnt,PieceAnt),
@@ -322,7 +321,7 @@ convertirRey(X,Y,white) :- cambiarPieza(X,Y,whiteKing).
 
 verificarTablero :- existeFicha(jugador1),
                     existeFicha(jugador2).
-                   % buscarMovimientos(_).
+                    buscarMovimientos(_).
 
 buscarMovimientos(Jugada) :- tablero(T),
                              buscarMovFila(1,1,Jugada,T).                    
@@ -339,6 +338,13 @@ buscarMovColumna(X,Y,Jugada,[H|_]) :- notEmpty(H),
                                       (jugadaValida(Piece,X,Y,XNuevo1,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo1,YNuevo2));
                                       (jugadaValida(Piece,X,Y,XNuevo2,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo1));
                                       (jugadaValida(Piece,X,Y,XNuevo2,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo2))).
+
+buscarMovColumna(X,Y,Jugada,[H|_]) :- isKing(H), buscarPieza(X,Y,Piece),
+                                      diagonalesRey(X,Y,X2,Y2,X3,Y3),
+                                      diagonalRey(Piece,X2,Y2,X3,Y3,PosFin),
+                                      PosFin = posRey(_,_,XNuevo,YNuevo),
+                                      Jugada = movimiento(Piece,X,Y,XNuevo,YNuevo).
+
                                              
 buscarMovColumna(X,Y,Jugada,[_|T]) :- XNuevo is X + 1,
                                              buscarMovColumna(XNuevo,Y,Jugada,T).
@@ -355,6 +361,7 @@ jugarMaquina :- findall(M,buscarMovimientos(M),Lista),
                 random_member(Move,Lista),
                 Move = movimiento(Piece,X1,Y1,X2,Y2),
                 asociarJugador(jugador2,Piece),
+                write('La computadora movio: '), write(Move),nl,
                 jugada(X1,Y1,X2,Y2),!.
                 
 jugarMaquina :- jugarMaquina.

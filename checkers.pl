@@ -145,17 +145,29 @@ diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 < Y2,
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
 
                                   
-diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 + 2, Y2 is Y1 + 2,
-                                          X3 is X1 + 3, Y3 is Y1 + 3.
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 + 1, YInter is Y1 + 1,
+                                    buscarPieza(XInter,YInter,Piece),
+                                    Piece = empty,
+                                    X2 is X1 + 2, Y2 is Y1 + 2,
+                                    X3 is X1 + 3, Y3 is Y1 + 3.
                                            
-diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 + 2, Y2 is Y1 - 2,
-                                          X3 is X1 + 3, Y3 is Y1 - 3.
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 + 1, YInter is Y1 - 1,
+                                    buscarPieza(XInter,YInter,Piece),
+                                    Piece = empty,
+                                    X2 is X1 + 2, Y2 is Y1 - 2,
+                                    X3 is X1 + 3, Y3 is Y1 - 3.
                                                                                      
-diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 - 2, Y2 is Y1 + 2,
-                                          X3 is X1 - 3, Y3 is Y1 + 3.
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 - 1, YInter is Y1 + 1,
+                                    buscarPieza(XInter,YInter,Piece),
+                                    Piece = empty,
+                                    X2 is X1 - 2, Y2 is Y1 + 2,
+                                    X3 is X1 - 3, Y3 is Y1 + 3.
                                                                                      
-diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- X2 is X1 - 2, Y2 is Y1 - 2,
-                                          X3 is X1 - 3, Y3 is Y1 - 3.
+diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 - 1, YInter is Y1 - 1,
+                                    buscarPieza(XInter,YInter,Piece),
+                                    Piece = empty,
+                                    X2 is X1 - 2, Y2 is Y1 - 2,
+                                    X3 is X1 - 3, Y3 is Y1 - 3.
                                           
                                           
 % Ver si la pieza se puede mover al lugar indicado. Ya fue verificado que es el jugador correcto.                                

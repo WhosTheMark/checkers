@@ -8,9 +8,9 @@ tableroInicial(X) :- X =
  [empty,black,empty,black,empty,black,empty,black],
 
  [empty,empty,empty,empty,empty,empty,empty,empty],
- [empty,empty,empty,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,empty,white,empty,empty],
 
- [white,empty,white,empty,white,empty,white,empty],
+ [white,empty,white,empty,empty,empty,white,empty],
 
  %[empty,white,empty,white,empty,white,empty,white],
  %[white,empty,white,empty,white,empty,white,empty]].
@@ -86,7 +86,14 @@ piezaContraria(black,white).
 piezaContraria(black,whiteKing).
 piezaContraria(blackKing,white).
 piezaContraria(blackKing,whiteKing).
-piezaContraria(X,Y) :- piezaContraria(Y,X),!.
+
+piezaContraria(white,black).
+piezaContraria(whiteKing,black).
+piezaContraria(white,blackKing).
+piezaContraria(whiteKing,blackKing).
+
+
+%piezaContraria(X,Y) :- piezaContraria(Y,X),!.
 
 isKing(whiteKing).
 isKing(blackKing).

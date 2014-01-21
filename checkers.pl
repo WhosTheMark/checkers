@@ -1,6 +1,11 @@
+/*
+   Proyecto 2 - Checkers
+   Grupo 9
+   Autores: Marcos Campos  10-10108
+            Andrea Salcedo 10-10666
+*/
 
-
-% Tablero inicializado
+% Tablero inicializado 
 
 tableroInicial(X) :- X =
 [[empty,black,empty,black,empty,black,empty,black],
@@ -28,60 +33,69 @@ tableroInicial(X) :- X =
    [empty,empty,empty,empty,empty,empty,empty,empty]].
  */
  
-% Inicializar tablero dinamicamente 
+% Inicializa el tablero. establece que es un turno normal y que el jugador actual es jugador1. 
  inicializar :- tableroInicial(X), assert(tablero(X)),
                 assert(turnoNormal),
                 assert(jugadorActual(jugador1)).
  
+ % Convierte los nombres de las fichas a los simbolos pertinentes para imprimirlos en el tablero.
  convertir(empty, '  ').
  convertir(black, '< ').
  convertir(blackKing, '<<').
  convertir(white, '> ').
  convertir(whiteKing, '>>').
  
+ % Dice cuales fichas no son vacias.
  notEmpty(white).
  notEmpty(black).
  notEmpty(whiteKing).
  notEmpty(blackKing).
  
+ % Imprime el tablero actual.
  imprimirTablero :- write('    1    2    3    4    5    6    7    8'),
                     nl,
                     tablero(X),
                     imprimirFila(1,X),!.
                 
-                
+% Imprime las filas del tablero actual.                
 imprimirFila(9,_).                
 imprimirFila(Cont,[H|T]) :- write(Cont), write(' '),
                             imprimirColumna(H),
                             ContNuevo is Cont + 1,
                             nl,
                             imprimirFila(ContNuevo,T).
-                            
+
+% Imprime las columnas del tablero actual.                            
 imprimirColumna([]).                            
 imprimirColumna([H|T]) :- convertir(H,X),
                           write('|'),write(X),write('| '),
                           imprimirColumna(T).
                           
-
+% Asocia las fichas al jugador.
 asociarJugador(jugador1,black).
 asociarJugador(jugador1,blackKing).
 asociarJugador(jugador2,white).
 asociarJugador(jugador2,whiteKing).
 
+% Busca una ficha en el tablero, dado su posicion.
 buscarPieza(X,Y,Piece) :- tablero(T),
                           buscarFila(X,Y,T,Piece),!.
                           
+% Busca la fila donde esta un ficha, dada su posicion.
 buscarFila(X,1,[H|_],Piece) :- buscarColumna(X,H,Piece).
 buscarFila(X,Y,[_|T],Piece) :- YNuevo is Y - 1,
                                buscarFila(X,YNuevo,T,Piece).
-                               
+
+% Busca la columna donde esta un ficha, dada su posicion.                               
 buscarColumna(1,[H|_],H).
 buscarColumna(X,[_|T],Piece) :- XNuevo is X - 1,
                                 buscarColumna(XNuevo,T,Piece).
 
+% Verifica si la posicion dada esta en el rango del tablero.
 posicionValida(X,Y) :- X >= 1, X =< 8,
                        Y >= 1, Y =< 8.
-                       
+
+% Establece las fichas contrarias de una ficha dada. La ficha vacia no tiene contraria.                       
 piezaContraria(black,white).
 piezaContraria(black,whiteKing).
 piezaContraria(blackKing,white).
@@ -94,10 +108,11 @@ piezaContraria(X,Y) :- piezaContraria(Y,X),!.
 %piezaContraria(white,blackKing).
 %piezaContraria(whiteKing,blackKing).
 
-
+% Establece cuales fichas son reyes.
 isKing(whiteKing).
 isKing(blackKing).
 
+% Establece cuales fichas no son reyes.
 isNotKing(white).
 isNotKing(black).
 

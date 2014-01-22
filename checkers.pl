@@ -103,11 +103,6 @@ piezaContraria(blackKing,whiteKing).
 piezaContraria(empty,_) :- !,fail.
 piezaContraria(X,Y) :- piezaContraria(Y,X),!.
 
-%piezaContraria(white,black).
-%piezaContraria(whiteKing,black).
-%piezaContraria(white,blackKing).
-%piezaContraria(whiteKing,blackKing).
-
 % Establece cuales fichas son reyes.
 isKing(whiteKing).
 isKing(blackKing).
@@ -116,10 +111,12 @@ isKing(blackKing).
 isNotKing(white).
 isNotKing(black).
 
+% Dado las coordenadas Y de un movimiento, devuelve las posibles posiciones que se puede mover verticalmente un peon.
 direccionVertical(Y1,Y2,TypePiece,YNuevo1,YNuevo2) :- 
                       ((TypePiece = black; TypePiece = whiteKing; TypePiece = blackKing), Y2 > Y1, YNuevo1 is Y1 + 1, YNuevo2 is Y1 + 2);
                       ((TypePiece = white; TypePiece = blackKing; TypePiece = whiteKing), Y2 < Y1, YNuevo1 is Y1 - 1, YNuevo2 is Y1 - 2).
                  
+% Dado la coordenada X de un movimiento, devuelve las posibles posiciones que se puede mover horizontalmente un peon.
 direccionHorizontal(X,XDiag1,XDiag2) :- XDiag1 is X + 1, XDiag2 is X + 2.
 direccionHorizontal(X,XDiag1,XDiag2) :- XDiag1 is X - 1, XDiag2 is X - 2. 
 
@@ -303,17 +300,37 @@ jugarDeNuevo(X,Y,Piece) :- isKing(Piece),
                            !.
                             
 jugarDeNuevo(_,_,_) :- cambiarJugador, turno.
-                            
+
+turno :- jugadorActual(X),
+         X = jugador2,
+         tipoJuego(computadora),
+         imprimirTablero,
+         verificarTablero,
+         write('Juega '), write(X),
+         jugarMaquina,!.
+
 turno :- imprimirTablero,
          verificarTablero,
          jugadorActual(X),
          write('Juega '), write(X),!.
 
 turno :- cambiarJugador,
-         jugadorActual(X),
-         write('Ha ganado el '), write(X),
+         tablero(T),
+         flatten(T,F),
+         findall(_, member(black,F), LBlack),
+         findall(_, member(blackKing,F), LBK),
+         findall(_, member(white,F), LWhite),
+         findall(_, member(whiteKing,F), LWK),
+         append(LBlack,LBK,TotalBlack),
+         append(LWhite,LWK,TotalWhite),
+         length(TotalBlack,LenBlack),
+         length(TotalWhite,LenWhite),
+         ganador(LenBlack,LenWhite),
          retract(tablero(_)),!.
-         
+ 
+ganador(L1,L2) :- L1 > L2, write('Ha ganado el jugador 1!'). 
+ganador(L1,L2) :- L1 < L2, write('Ha ganado el jugador 2!').      
+ganador(L1,L2) :- L1 =:= L2, write('Empate!').           
          
 jugar :- inicializar,
          preguntar,
@@ -362,7 +379,7 @@ buscarMovColumna(X,Y,Jugada,[H|_]) :- isKing(H), buscarPieza(X,Y,Piece),
 
                                              
 buscarMovColumna(X,Y,Jugada,[_|T]) :- XNuevo is X + 1,
-                                             buscarMovColumna(XNuevo,Y,Jugada,T).
+                                      buscarMovColumna(XNuevo,Y,Jugada,T).
                         
 existeFicha(Jugador) :- tablero(T),
                         existeFichaFila(T,Jugador).
@@ -373,17 +390,29 @@ existeFichaFila([_|T],Jugador) :- existeFichaFila(T,Jugador).
 
 
 jugarMaquina :- findall(M,buscarMovimientos(M),Lista),
-                random_member(Move,Lista),
+                dividirMovHelper(Lista,_,ListaJug2),
+                random_member(Move,ListaJug2),
                 Move = movimiento(Piece,X1,Y1,X2,Y2),
-                asociarJugador(jugador2,Piece),
-                write('La computadora movio: '), write(Move),nl,
+                nl, nl, write('La computadora movio: '), write(Move),nl,
                 jugada(X1,Y1,X2,Y2),!.
                 
-jugarMaquina :- jugarMaquina.
 
 
+dividirMovimientos(L,ListaJug1,ListaJug2) :- dividirMovHelper(L,[],[],ListaJug1,ListaJug2).
+
+dividirMovHelper([],ListaJug1,ListaJug2,ListaJug1,ListaJug2).
+dividirMovHelper([H|T],Acc1,Acc2,ListaJug1,ListaJug2) :- H = movimiento(Piece,_,_,_,_),
+                                                         asociarJugador(jugador1,Piece),
+                                                         Acc1Nuevo = [H|Acc1],
+                                                         dividirMovHelper(T,Acc1Nuevo,Acc2,ListaJug1,ListaJug2),!.
+dividirMovHelper([H|T],Acc1,Acc2,ListaJug1,ListaJug2) :- H = movimiento(Piece,_,_,_,_),
+                                                         asociarJugador(jugador2,Piece),
+                                                         Acc2Nuevo = [H|Acc2],
+                                                         dividirMovHelper(T,Acc1,Acc2Nuevo,ListaJug1,ListaJug2),!.
 
 
+?- jugar.
+?- jugada(2,7,3,8).
 
 
 

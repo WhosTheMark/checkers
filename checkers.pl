@@ -8,31 +8,36 @@
 % Tablero inicializado 
 
 tableroInicial(X) :- X =
+/*
 [[empty,black,empty,black,empty,black,empty,black],
  [black,empty,black,empty,black,empty,black,empty],
  [empty,black,empty,black,empty,black,empty,black],
-
  [empty,empty,empty,empty,empty,empty,empty,empty],
- [empty,empty,empty,empty,empty,white,empty,empty],
+ [empty,empty,empty,empty,empty,empty,empty,empty],
+ [white,empty,white,empty,white,empty,white,empty],
+ [empty,white,empty,white,empty,white,empty,white],
+ [white,empty,white,empty,white,empty,white,empty]].
 
- [white,empty,white,empty,empty,empty,white,empty],
 
- %[empty,white,empty,white,empty,white,empty,white],
- %[white,empty,white,empty,white,empty,white,empty]].
- [empty,black,empty,white,empty,white,empty,white],
- [empty,empty,empty,empty,empty,empty,empty,empty]].
- 
-/* 
-  [[empty,empty,empty,empty,empty,empty,empty,empty],
-   [empty,empty,empty,empty,empty,empty,empty,black],
-   [black,empty,black,empty,black,empty,empty,empty],
-   [empty,black,empty,black,empty,black,empty,black],
-   [white,empty,white,empty,white,empty,white,empty],
-   [empty,white,empty,white,empty,white,empty,white],
-   [empty,empty,empty,empty,empty,empty,empty,empty],
-   [empty,empty,empty,empty,empty,empty,empty,empty]].
- */
- 
+*/
+
+
+
+
+[[empty,empty,empty,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,empty,empty,whiteKing,empty],
+ [empty,empty,empty,empty,empty,empty,empty,empty],
+ [empty,empty,whiteKing,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,empty,black,empty,empty],
+ [empty,empty,black,empty,empty,empty,empty,empty],
+ [empty,black,empty,black,empty,black,empty,black],
+ [white,empty,blackKing,empty,blackKing,empty,blackKing,empty]].
+
+
+
+
+
+
 % Inicializa el tablero. establece que es un turno normal y que el jugador actual es jugador1. 
  inicializar :- tableroInicial(X), assert(tablero(X)),
                 assert(turnoNormal),
@@ -100,8 +105,17 @@ piezaContraria(black,white).
 piezaContraria(black,whiteKing).
 piezaContraria(blackKing,white).
 piezaContraria(blackKing,whiteKing).
-piezaContraria(empty,_) :- !,fail.
-piezaContraria(X,Y) :- piezaContraria(Y,X),!.
+piezaContraria(white,black).
+piezaContraria(whiteKing,black).
+piezaContraria(white,blackKing).
+piezaContraria(whiteKing,blackKing).
+
+%piezaContraria(empty,_) :- !,fail.
+%piezaContraria(X,Y) :- piezaContraria(Y,X),!.
+
+
+
+
 
 % Establece cuales fichas son reyes.
 isKing(whiteKing).
@@ -124,11 +138,11 @@ direccionHorizontal(X,XDiag1,XDiag2) :- XDiag1 is X - 1, XDiag2 is X - 2.
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- posicionValida(X2,Y2),
                                          buscarPieza(X1,Y1,PieceAnt),
                                          piezaContraria(Piece,PieceAnt),
-                                         buscarPieza(X2,Y2,PieceAct),
+                                         buscarPieza(X2,Y2,PieceAct), 
                                          PieceAct = empty,
                                          PosFin = posRey(X1,Y1,X2,Y2),!.
 
-                                  
+ 
 diagonalRey(_,X1,Y1,X2,Y2,PosFin) :- posicionValida(X2,Y2),
                                      buscarPieza(X1,Y1,PieceAnt),
                                      PieceAnt = empty,
@@ -156,26 +170,30 @@ diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- X1 < X2, Y1 < Y2,
                                          posicionValida(XDiag,YDiag),
                                          diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
 
-                                  
+                                 
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 + 1, YInter is Y1 + 1,
+                                    posicionValida(XInter,YInter),
                                     buscarPieza(XInter,YInter,Piece),
                                     Piece = empty,
                                     X2 is X1 + 2, Y2 is Y1 + 2,
                                     X3 is X1 + 3, Y3 is Y1 + 3.
                                            
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 + 1, YInter is Y1 - 1,
+                                    posicionValida(XInter,YInter),
                                     buscarPieza(XInter,YInter,Piece),
                                     Piece = empty,
                                     X2 is X1 + 2, Y2 is Y1 - 2,
                                     X3 is X1 + 3, Y3 is Y1 - 3.
                                                                                      
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 - 1, YInter is Y1 + 1,
+                                    posicionValida(XInter,YInter),
                                     buscarPieza(XInter,YInter,Piece),
                                     Piece = empty,
                                     X2 is X1 - 2, Y2 is Y1 + 2,
                                     X3 is X1 - 3, Y3 is Y1 + 3.
                                                                                      
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- XInter is X1 - 1, YInter is Y1 - 1,
+                                    posicionValida(XInter,YInter),
                                     buscarPieza(XInter,YInter,Piece),
                                     Piece = empty,
                                     X2 is X1 - 2, Y2 is Y1 - 2,
@@ -196,10 +214,13 @@ jugadaValida(Piece,X1,Y1,X2,Y2) :-
                            buscarPieza(XDiag1,YNuevo1,PieceDiag1), piezaContraria(Piece,Contraria1), PieceDiag1 = Contraria1)),
                      !.
                      
-jugadaValida(Piece,X1,Y1,X2,Y2) :- (Piece = blackKing; Piece = whiteKing),
+jugadaValida(Piece,X1,Y1,X2,Y2) :- (Piece = blackKing; Piece = whiteKing), posicionValida(X2,Y2),
+                                   
                                    diagonalesRey(X1,Y1,XRey2,YRey2,XRey3,YRey3),
+                                   posicionValida(XRey2,YRey2),
                                    diagonalRey(Piece,XRey2,YRey2,XRey3,YRey3,PosFin),
                                    PosFin = posRey(XAnt,YAnt,X2,Y2),
+                                   posicionValida(XAnt,YAnt),
                                    buscarPieza(XAnt,YAnt,PieceAnt),                                    
                                    (PieceAnt = empty; ((turnoNormal,!); 
                                    (turnoEspecial(Xspecial, Yspecial), Xspecial = X1, Yspecial = Y1))).
@@ -304,8 +325,8 @@ jugarDeNuevo(_,_,_) :- cambiarJugador, turno.
 turno :- jugadorActual(X),
          X = jugador2,
          tipoJuego(computadora),
-         imprimirTablero,
          verificarTablero,
+         imprimirTablero,         
          write('Juega '), write(X),
          jugarMaquina,!.
 
@@ -325,6 +346,7 @@ turno :- cambiarJugador,
          append(LWhite,LWK,TotalWhite),
          length(TotalBlack,LenBlack),
          length(TotalWhite,LenWhite),
+         nl,
          ganador(LenBlack,LenWhite),
          retract(tablero(_)),!.
  
@@ -338,22 +360,22 @@ jugar :- inicializar,
          nl,
          turno.
 
-preguntar :- write('Desea jugar contra la maquina (S/N)? '),
-             read(Input),        
-             ((Input = 'S', assert(tipoJuego(computadora))); 
-             (Input = 'N', assert(tipoJuego(humano)))),!.
+preguntar :- write('Desea jugar contra la maquina (s/n)? '),
+             read(Input), 
+             ((Input = s, assert(tipoJuego(computadora))); 
+             (Input = n, assert(tipoJuego(humano)))),!.
              
 preguntar :- preguntar.
          
 convertirRey(X,Y,black) :- cambiarPieza(X,Y,blackKing).
 convertirRey(X,Y,white) :- cambiarPieza(X,Y,whiteKing).
 
-
-
-
 verificarTablero :- existeFicha(jugador1),
-                    existeFicha(jugador2).
-                    buscarMovimientos(_).
+                    existeFicha(jugador2),
+                    findall(M,buscarMovimientos(M),Lista),
+                    dividirMovimientos(Lista,ListaJug1,ListaJug2),
+                    length(ListaJug1,L1), length(ListaJug2,L2),
+                    L1 > 0, L2 > 0.
 
 buscarMovimientos(Jugada) :- tablero(T),
                              buscarMovFila(1,1,Jugada,T).                    
@@ -371,7 +393,8 @@ buscarMovColumna(X,Y,Jugada,[H|_]) :- notEmpty(H),
                                       (jugadaValida(Piece,X,Y,XNuevo2,YNuevo1), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo1));
                                       (jugadaValida(Piece,X,Y,XNuevo2,YNuevo2), Jugada = movimiento(Piece,X,Y,XNuevo2,YNuevo2))).
 
-buscarMovColumna(X,Y,Jugada,[H|_]) :- isKing(H), buscarPieza(X,Y,Piece),
+buscarMovColumna(X,Y,Jugada,[H|_]) :- 
+                                      isKing(H),buscarPieza(X,Y,Piece),
                                       diagonalesRey(X,Y,X2,Y2,X3,Y3),
                                       diagonalRey(Piece,X2,Y2,X3,Y3,PosFin),
                                       PosFin = posRey(_,_,XNuevo,YNuevo),
@@ -385,15 +408,16 @@ existeFicha(Jugador) :- tablero(T),
                         existeFichaFila(T,Jugador).
 
 existeFichaFila([H|_],Jugador) :- asociarJugador(Jugador,Piece),
-                                  member(Piece,H).
+                                  member(Piece,H),!.
 existeFichaFila([_|T],Jugador) :- existeFichaFila(T,Jugador).
 
 
 jugarMaquina :- findall(M,buscarMovimientos(M),Lista),
-                dividirMovHelper(Lista,_,ListaJug2),
+                dividirMovimientos(Lista,_,ListaJug2),
                 random_member(Move,ListaJug2),
-                Move = movimiento(Piece,X1,Y1,X2,Y2),
-                nl, nl, write('La computadora movio: '), write(Move),nl,
+                Move = movimiento(_,X1,Y1,X2,Y2),
+                nl, nl, write('La computadora movio: '), 
+                write(Move), nl, nl,
                 jugada(X1,Y1,X2,Y2),!.
                 
 
@@ -411,13 +435,7 @@ dividirMovHelper([H|T],Acc1,Acc2,ListaJug1,ListaJug2) :- H = movimiento(Piece,_,
                                                          dividirMovHelper(T,Acc1,Acc2Nuevo,ListaJug1,ListaJug2),!.
 
 
-?- jugar.
-?- jugada(2,7,3,8).
-
-
-
-
-                      
+                  
 
 
 

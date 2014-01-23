@@ -17,14 +17,14 @@ tableroInicial(X) :- X =
  [empty,white,empty,white,empty,white,empty,white],
  [white,empty,white,empty,white,empty,white,empty]].*/
 
-[[empty,black,empty,black,empty,black,empty,black],
- [black,empty,black,empty,black,empty,black,empty],
- [empty,empty,empty,black,empty,empty,empty,empty],
- [black,empty,empty,empty,black,empty,empty,empty],
- [empty,empty,empty,white,empty,black,empty,white],
- [white,empty,empty,empty,white,empty,white,empty],
- [empty,white,empty,white,empty,white,empty,white],
- [white,empty,white,empty,empty,empty,white,empty]]. 
+[[empty,black,empty,black,empty,whiteKing,empty,black],
+ [empty,empty,black,empty,empty,empty,empty,empty],
+ [empty,black,empty,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,empty,empty,empty,empty],
+ [empty,empty,empty,empty,black,empty,empty,empty],
+ [empty,empty,empty,empty,empty,blackKing,empty,empty],
+ [blackKing,empty,blackKing,empty,empty,empty,white,empty]]. 
  
  
  
@@ -141,28 +141,28 @@ diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :-
       X1 > X2, Y1 > Y2,
       XDiag is X2 - 1, YDiag is Y2 - 1,
       posicionValida(XDiag,YDiag),
-      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin).
 
 % Verifica las posiciones diagonales de un rey, paso recursivo.      
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- 
       X1 < X2, Y1 > Y2,
       XDiag is X2 + 1, YDiag is Y2 - 1,
       posicionValida(XDiag,YDiag),
-      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin).
 
 % Verifica las posiciones diagonales de un rey, paso recursivo.      
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- 
       X1 > X2, Y1 < Y2,
       XDiag is X2 - 1, YDiag is Y2 + 1,
       posicionValida(XDiag,YDiag),
-      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin).
 
 % Verifica las posiciones diagonales de un rey, paso recursivo.      
 diagonalRey(Piece,X1,Y1,X2,Y2,PosFin) :- 
       X1 < X2, Y1 < Y2,
       XDiag is X2 + 1, YDiag is Y2 + 1,
       posicionValida(XDiag,YDiag),
-      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin),!.
+      diagonalRey(Piece,X2,Y2,XDiag,YDiag,PosFin).
 
 % Devuelve las posiciones diagonales de un rey.                                 
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- 
@@ -170,8 +170,8 @@ diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :-
       posicionValida(XInter,YInter),
       buscarPieza(XInter,YInter,Piece),
       Piece = empty,
-      X2 is X1 + 2, Y2 is Y1 + 2,
-      X3 is X1 + 3, Y3 is Y1 + 3.
+      X2 is X1 + 1, Y2 is Y1 + 1,
+      X3 is X1 + 2, Y3 is Y1 + 2.
 
 % Devuelve las posiciones diagonales de un rey.               
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- 
@@ -179,8 +179,8 @@ diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :-
       posicionValida(XInter,YInter),
       buscarPieza(XInter,YInter,Piece),
       Piece = empty,
-      X2 is X1 + 2, Y2 is Y1 - 2,
-      X3 is X1 + 3, Y3 is Y1 - 3.
+      X2 is X1 + 1, Y2 is Y1 - 1,
+      X3 is X1 + 2, Y3 is Y1 - 2.
                                                
 % Devuelve las posiciones diagonales de un rey.       
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- 
@@ -188,8 +188,8 @@ diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :-
       posicionValida(XInter,YInter),
       buscarPieza(XInter,YInter,Piece),
       Piece = empty,
-      X2 is X1 - 2, Y2 is Y1 + 2,
-      X3 is X1 - 3, Y3 is Y1 + 3.
+      X2 is X1 - 1, Y2 is Y1 + 1,
+      X3 is X1 - 2, Y3 is Y1 + 2.
                                                
 % Devuelve las posiciones diagonales de un rey.          
 diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :- 
@@ -197,8 +197,8 @@ diagonalesRey(X1,Y1,X2,Y2,X3,Y3) :-
       posicionValida(XInter,YInter),
       buscarPieza(XInter,YInter,Piece),
       Piece = empty,
-      X2 is X1 - 2, Y2 is Y1 - 2,
-      X3 is X1 - 3, Y3 is Y1 - 3.
+      X2 is X1 - 1, Y2 is Y1 - 1,
+      X3 is X1 - 2, Y3 is Y1 - 2.
                                                     
 /* Verifica si una ficha puede hacer el movimiento dado.
    Este caso considera un movimiento de un peon. */

@@ -7,6 +7,7 @@
 
 % Tablero inicializado.
 tableroInicial(X) :- X =
+/*
 [[empty,black,empty,black,empty,black,empty,black],
  [black,empty,black,empty,black,empty,black,empty],
  [empty,black,empty,black,empty,black,empty,black],
@@ -14,8 +15,19 @@ tableroInicial(X) :- X =
  [empty,empty,empty,empty,empty,empty,empty,empty],
  [white,empty,white,empty,white,empty,white,empty],
  [empty,white,empty,white,empty,white,empty,white],
- [white,empty,white,empty,white,empty,white,empty]].
+ [white,empty,white,empty,white,empty,white,empty]].*/
 
+[[empty,black,empty,black,empty,black,empty,black],
+ [black,empty,black,empty,black,empty,black,empty],
+ [empty,empty,empty,black,empty,empty,empty,empty],
+ [black,empty,empty,empty,black,empty,empty,empty],
+ [empty,empty,empty,white,empty,black,empty,white],
+ [white,empty,empty,empty,white,empty,white,empty],
+ [empty,white,empty,white,empty,white,empty,white],
+ [white,empty,white,empty,empty,empty,white,empty]]. 
+ 
+ 
+ 
 /* Inicializa el tablero. Establece que es un turno normal 
    y que el jugador actual es jugador1. */ 
 inicializar :- 
@@ -230,8 +242,7 @@ cambiarFila(X,Y,TypePiece,[H|T],[H|TNuevo]) :- YNuevo is Y - 1,
 cambiarColumna(1,TypePiece,[_|T], [TypePiece|T]).                      
 cambiarColumna(X,TypePiece,[H|T],[H|TNuevo]) :- XNuevo is X - 1,
                                                 cambiarColumna(XNuevo,TypePiece,T,TNuevo).   
-                                                
-               
+                                                               
 % Cambia el jugador actual.
 cambiarJugador :- 
       jugadorActual(X), retract(jugadorActual(_)),
@@ -353,7 +364,8 @@ verificarTablero :- existeFicha(jugador1),
                     findall(M,buscarMovimientos(M),Lista),
                     dividirMovimientos(Lista,ListaJug1,ListaJug2),
                     length(ListaJug1,L1), length(ListaJug2,L2),
-                    L1 > 0, L2 > 0.
+                    ((turnoNormal, L1 > 0, L2 > 0); 
+                    (turnoEspecial(_,_),((L1 >= 0, L2 > 0);(L1 > 0, L2 >= 0)))).
 
 % Busca todos los movimientos posibles en el tablero.
 buscarMovimientos(Jugada) :- tablero(T), buscarMovFila(1,1,Jugada,T).                    
